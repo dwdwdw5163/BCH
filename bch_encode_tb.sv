@@ -5,7 +5,6 @@ module bch_encode_tb;
     parameter N = 63;
     parameter K = 24;
     parameter CLK_PERIOD = 10;
-    parameter DATA_LENGTH = 24; // Length of the MATLAB array [1 0 1 0 1 0 1 0]
     
     // Signals
     reg clk;
@@ -16,7 +15,7 @@ module bch_encode_tb;
     wire ecc_valid;
     
     // Memory array to store input data from file
-    reg [0:0] input_data [0:DATA_LENGTH-1]; // Unpacked array for $readmemb    
+    reg [0:0] input_data [0:K-1]; // Unpacked array for $readmemb    
     // Loop variable
     integer i;
     
@@ -24,7 +23,8 @@ module bch_encode_tb;
     bch_encode #(
         .N(N),
         .K(K),
-        .WIDTH(1)
+        .WIDTH(1),
+        .COEFF_FILE("./g_coff_63_24.txt")
     ) dut (
         .clk(clk),
         .rst_n(rst_n),
@@ -51,16 +51,16 @@ module bch_encode_tb;
         $readmemb("./input_data.txt", input_data);
         
         // Reset
-        #20 rst_n = 1;
+        #22 rst_n = 1;
         
         // Test case 1: Send data from file
         @(posedge clk);
         data_valid = 1;
-        for (i = 0; i < DATA_LENGTH; i = i + 1) begin
+        for (i = 0; i < K; i = i + 1) begin
             data_in = input_data[i];
             @(posedge clk);
         end
-        for (i = 0; i < 63-24; i = i + 1) begin
+        for (i = 0; i < N-K; i = i + 1) begin
             data_in = 0;
             @(posedge clk);
         end
